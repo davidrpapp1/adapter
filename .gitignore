@@ -1,0 +1,45 @@
+# Build files
+build/
+*.o
+*.a
+*.so
+
+# IDE files
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Test output files
+*_cleaned.csv
+test_*.csv
+integration_test_*
+test_config.txt
+
+# Log files
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+
+# Debug files
+*.gdb
+core.*
+
+# Backup files
+*.bak
+*.backup
+
+# Dependencies
+.deps/
+
+# Coverage files
+*.gcov
+*.gcda
+*.gcno
+
+# Profiling
+gmon.out
+*.prof

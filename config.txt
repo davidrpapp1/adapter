@@ -1,0 +1,23 @@
+# Adapter Configuration File
+
+# Input/Output Settings
+input_file=data.csv
+output_file=cleaned_data.csv
+
+# CSV Format Settings
+delimiter=,
+
+# Time Series Settings
+time_column=time
+target_time_interval=1.0
+
+# Variable Classification
+dependent_variables=temperature,pressure,flow_rate
+independent_variables=humidity,wind_speed
+
+# Data Processing Settings
+numeric_precision=2
+date_format=%Y-%m-%d
+
+# Solver Settings (for time alignment)
+solver_method=linear
