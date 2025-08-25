@@ -1,0 +1,23 @@
+# Production Configuration for Large Dataset Processing
+
+# Input/Output Settings
+input_file=large_dataset.csv
+output_file=processed_large_dataset.csv
+
+# CSV Format Settings
+delimiter=,
+
+# Time Series Settings
+time_column=date
+target_time_interval=86400.0
+
+# Variable Classification
+dependent_variables=cpu_usage,memory_usage
+independent_variables=disk_io,network_traffic,error_count
+
+# Data Processing Settings
+numeric_precision=1
+date_format=%Y-%m-%d
+
+# Solver Settings (for time alignment)
+solver_method=linear

@@ -28,6 +28,7 @@ private:
 
   bool is_numeric(const std::string &value) const;
   bool is_date(const std::string &value) const;
+  bool is_numeric_column(const std::vector<std::string> &column) const;
   std::string normalize_date_format(const std::string &value) const;
   std::string normalize_numeric_format(const std::string &value) const;
   std::string calculate_mean(const std::vector<std::string> &column) const;

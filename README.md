@@ -1,22 +1,21 @@
 # Adapter - High-Performance Data Cleaning and Preparation Tool
 
-A robust C++ application for cleaning, processing, and aligning CSV data with focus on time series data preparation.
+A robust, high-performance C++ application for cleaning, processing, and aligning CSV data with a focus on time series data preparation.
 
-## Features
+## Quick Start
 
-- **CSV Parsing**: Robust parsing with support for various delimiters and quoted fields
-- **Data Cleaning**: Automatic removal of duplicates, handling of missing values, format normalization
-- **Time Series Alignment**: Sophisticated time alignment with multiple interpolation methods
-- **Configuration Management**: Flexible configuration system with file-based settings
-- **High Performance**: Optimized C++ implementation for processing large datasets
-
-## Build Requirements
+### Prerequisites
 
 - C++17 compatible compiler (g++ 7.0+ or clang++ 5.0+)
+- Make
 
-## Building
+### Building
 
 ```bash
+# Clone the repository
+git clone https://github.com/davidrpapp1/adapter.git
+cd adapter
+
 # Build the main executable
 make
 
@@ -25,15 +24,7 @@ make test
 
 # Build optimized release version
 make release
-
-# Build debug version
-make debug
-
-# Install system-wide
-make install
 ```
-
-## Usage
 
 ### Basic Usage
 
@@ -41,35 +32,61 @@ make install
 # Process a CSV file with default settings
 ./build/adapter data.csv
 
-# Specify output file
-./build/adapter -o cleaned_data.csv data.csv
+# Time series alignment with 5-second intervals
+./build/adapter -t timestamp -d temperature,pressure,flow sensor_data.csv
 
-# Use configuration file
-./build/adapter -c config.txt data.csv
+# Custom delimiter and configuration
+./build/adapter -c config.txt --delimiter ";" data.csv
 ```
 
-### Advanced Usage
+## Examples
 
+The `sample_data/` directory contains example files demonstrating various use cases:
+
+### 1. Basic Data Cleaning
 ```bash
-# Time series alignment
-./build/adapter -t timestamp -d temperature,pressure data.csv
-
-# Custom delimiter
-./build/adapter --delimiter ";" data.csv
-
-# Specify variable types
-./build/adapter -t time -d dependent_vars -i independent_vars data.csv
+./build/adapter sample_data/data.csv
 ```
+- Removes duplicate rows
+- Fills missing values with calculated means
+- Normalizes numeric precision
+- Creates time-aligned interpolated series
 
-### Command Line Options
+### 2. Time Series Processing
+```bash
+./build/adapter -t timestamp -d temperature,pressure,flow sample_data/sensor_data.csv
+```
+- Processes high-frequency sensor data
+- Creates uniform 1-second intervals
+- Interpolates missing time points
 
-- `-o, --output <file>`: Output file path
-- `-t, --time <column>`: Time column name for alignment
-- `-d, --dependent <vars>`: Comma-separated dependent variable names
-- `-i, --independent <vars>`: Comma-separated independent variable names
-- `-c, --config <file>`: Configuration file path
-- `--delimiter <char>`: CSV delimiter character
-- `-h, --help`: Show help message
+### 3. Production Data Processing
+```bash
+./build/adapter -c sample_data/production_config.txt sample_data/large_dataset.csv
+```
+- Uses configuration file for complex setups
+- Processes daily time series data
+- Handles system monitoring data with missing values
+
+### 4. Custom Delimiters
+```bash
+./build/adapter --delimiter ";" sample_data/semicolon_data.csv
+```
+- Processes semicolon-delimited files
+- Handles mixed data types
+- Preserves non-numeric fields
+
+## Command Line Options
+
+| Option | Description |
+|--------|-------------|
+| `-o, --output <file>` | Output file path |
+| `-t, --time <column>` | Time column name for alignment |
+| `-d, --dependent <vars>` | Comma-separated dependent variable names |
+| `-i, --independent <vars>` | Comma-separated independent variable names |
+| `-c, --config <file>` | Configuration file path |
+| `--delimiter <char>` | CSV delimiter character |
+| `-h, --help` | Show help message |
 
 ## Configuration File
 
@@ -84,86 +101,45 @@ output_file=cleaned_data.csv
 delimiter=,
 
 # Time Series Settings
-time_column=time
+time_column=timestamp
 target_time_interval=1.0
 
 # Variable Classification
-dependent_variables=temperature,pressure
+dependent_variables=temperature,pressure,flow_rate
 independent_variables=humidity,wind_speed
 
 # Data Processing Settings
 numeric_precision=2
 date_format=%Y-%m-%d
+
+# Solver Settings
+solver_method=linear
 ```
-
-## Architecture
-
-```
-include/adapter/
-├── csv_parser.hpp      # CSV file parsing
-├── data_cleaner.hpp    # Data cleaning operations
-├── time_aligner.hpp    # Time series alignment
-└── config_manager.hpp  # Configuration management
-
-src/
-├── csv_parser.cpp      # CSV parser implementation
-├── data_cleaner.cpp    # Data cleaning implementation
-├── time_aligner.cpp    # Time alignment implementation
-├── config_manager.cpp  # Configuration implementation
-└── main.cpp           # Main application
-
-tests/
-├── test_csv_parser.cpp     # CSV parser unit tests
-├── test_data_cleaner.cpp   # Data cleaner unit tests
-└── test_integration.cpp    # Integration tests
-```
-
-## Data Processing Pipeline
-
-1. **CSV Parsing**: Load and parse input CSV file with configurable delimiters
-2. **Data Cleaning**:
-   - Remove duplicate rows
-   - Handle missing values (replacement with mean/median/zero)
-   - Normalize numeric and date formats
-3. **Time Series Alignment**:
-   - Align data to uniform time intervals
-   - Interpolate missing time points
-   - Support for multiple solver methods
-4. **Output Generation**: Write processed data to output CSV file
 
 ## Development
 
-### Code Formatting
+### Building for Development
 ```bash
-make format
-```
+# Debug build with symbols
+make debug
 
-### Static Analysis
-```bash
+# Static analysis
 make analyze
-```
 
-### Project Structure
-```bash
+# Code formatting
+make format
+
+# View project structure
 make structure
 ```
 
-## Examples
-
-### Basic Data Cleaning
+### Running Tests
 ```bash
-# Clean a CSV file with automatic duplicate removal and missing value handling
-./build/adapter sensor_data.csv
-```
+# Run all test suites
+make test
 
-### Time Series Processing
-```bash
-# Align time series data with 5-second intervals
-./build/adapter -t timestamp -d temperature,pressure,flow sensor_data.csv
-```
-
-### Configuration-Based Processing
-```bash
-# Use predefined configuration
-./build/adapter -c production_config.txt large_dataset.csv
+# Run specific test suite
+./build/test_csv_parser
+./build/test_data_cleaner
+./build/test_integration
 ```

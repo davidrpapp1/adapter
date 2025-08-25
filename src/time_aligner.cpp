@@ -1,6 +1,9 @@
 #include "adapter/time_aligner.hpp"
 #include <algorithm>
+#include <chrono>
 #include <cmath>
+#include <ctime>
+#include <iomanip>
 #include <iostream>
 #include <regex>
 #include <sstream>
@@ -84,8 +87,8 @@ void TimeAligner::align_time_series_data(
   for (size_t time_idx = 0; time_idx < target_times.size(); ++time_idx) {
     std::vector<std::string> new_row(data[0].size());
 
-    // Set the time value
-    new_row[time_column_index] = std::to_string(target_times[time_idx]);
+    // Set the time value (convert back to readable format)
+    new_row[time_column_index] = format_time_value(target_times[time_idx]);
 
     // Interpolate each column
     for (size_t col = 0; col < data[0].size(); ++col) {
@@ -139,19 +142,104 @@ std::vector<double> TimeAligner::parse_time_column(
   std::vector<double> parsed_times;
 
   for (const auto &time_str : time_column) {
-    // Simple numeric timestamp parsing (assume Unix timestamp or seconds)
-    try {
-      double time_value = std::stod(time_str);
-      parsed_times.push_back(time_value);
-    } catch (const std::exception &) {
-      // If not a simple numeric value, try to parse as a date/time
-      // For now, just skip invalid entries
-      std::cerr << "Warning: Could not parse time value: " << time_str
-                << std::endl;
+    // Try parsing as numeric timestamp first (only if it's all digits and
+    // optional decimal point)
+    std::regex numeric_pattern(R"(^\d+(\.\d+)?$)");
+    if (std::regex_match(time_str, numeric_pattern)) {
+      try {
+        double time_value = std::stod(time_str);
+        parsed_times.push_back(time_value);
+        continue;
+      } catch (const std::exception &) {
+        // Not a numeric value, try date/time parsing
+      }
     }
+
+    // Try parsing ISO format: YYYY-MM-DDTHH:MM:SS or YYYY-MM-DD HH:MM:SS
+    std::regex iso_datetime_pattern(
+        R"((\d{4})-(\d{2})-(\d{2})[T\s](\d{2}):(\d{2}):(\d{2}))");
+    std::smatch matches;
+
+    if (std::regex_search(time_str, matches, iso_datetime_pattern)) {
+      try {
+        int year = std::stoi(matches[1]);
+        int month = std::stoi(matches[2]);
+        int day = std::stoi(matches[3]);
+        int hour = std::stoi(matches[4]);
+        int minute = std::stoi(matches[5]);
+        int second = std::stoi(matches[6]);
+
+        // Create a chrono time_point
+        std::tm tm = {};
+        tm.tm_year = year - 1900; // years since 1900
+        tm.tm_mon = month - 1;    // months since January (0-11)
+        tm.tm_mday = day;
+        tm.tm_hour = hour;
+        tm.tm_min = minute;
+        tm.tm_sec = second;
+        tm.tm_isdst = -1; // let mktime determine DST
+
+        std::time_t time_t_value = std::mktime(&tm);
+        if (time_t_value != -1) {
+          // Convert to seconds since Unix epoch (1970-01-01)
+          double time_value = static_cast<double>(time_t_value);
+          parsed_times.push_back(time_value);
+          continue;
+        }
+      } catch (const std::exception &) {
+        // Fall through to date-only parsing
+      }
+    }
+
+    // Try parsing just date: YYYY-MM-DD
+    std::regex date_pattern(R"((\d{4})-(\d{2})-(\d{2}))");
+    if (std::regex_search(time_str, matches, date_pattern)) {
+      try {
+        int year = std::stoi(matches[1]);
+        int month = std::stoi(matches[2]);
+        int day = std::stoi(matches[3]);
+
+        std::tm tm = {};
+        tm.tm_year = year - 1900;
+        tm.tm_mon = month - 1;
+        tm.tm_mday = day;
+        tm.tm_hour = 0;
+        tm.tm_min = 0;
+        tm.tm_sec = 0;
+        tm.tm_isdst = -1;
+
+        std::time_t time_t_value = std::mktime(&tm);
+        if (time_t_value != -1) {
+          double time_value = static_cast<double>(time_t_value);
+          parsed_times.push_back(time_value);
+          continue;
+        }
+      } catch (const std::exception &) {
+        // Continue to error case
+      }
+    }
+
+    // If all parsing attempts fail, skip this entry
+    std::cerr << "Warning: Could not parse time value: " << time_str
+              << std::endl;
   }
 
   return parsed_times;
+}
+
+std::string TimeAligner::format_time_value(double time_value) const {
+  // Convert from Unix timestamp to readable format using chrono
+  std::time_t time_t_value = static_cast<std::time_t>(time_value);
+  std::tm *tm_ptr = std::gmtime(&time_t_value);
+
+  if (tm_ptr == nullptr) {
+    // Fallback for invalid time
+    return "1970-01-01T00:00:00";
+  }
+
+  std::ostringstream oss;
+  oss << std::put_time(tm_ptr, "%Y-%m-%dT%H:%M:%S");
+  return oss.str();
 }
 
 std::vector<double>

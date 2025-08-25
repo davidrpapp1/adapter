@@ -45,13 +45,14 @@ void test_data_cleaner_duplicate_removal() {
 
   DataCleaner cleaner;
 
-  // Test data with duplicates
+  // Test data with duplicates (first row treated as header)
   std::vector<std::vector<std::string>> data = {
+      {"header1", "header2", "header3"}, // Header row
       {"10", "20", "30"},
       {"15", "25", "35"},
-      {"10", "20", "30"}, // Duplicate of first row
+      {"10", "20", "30"}, // Duplicate of first data row
       {"20", "30", "40"},
-      {"15", "25", "35"} // Duplicate of second row
+      {"15", "25", "35"} // Duplicate of second data row
   };
 
   size_t original_size = data.size();
@@ -59,7 +60,7 @@ void test_data_cleaner_duplicate_removal() {
 
   test_assert(data.size() < original_size, true,
               "duplicate rows should be removed");
-  test_assert(data.size(), static_cast<size_t>(3), "should have 3 unique rows");
+  test_assert(data.size(), static_cast<size_t>(4), "should have 4 rows (1 header + 3 unique data)");
 
   std::cout << "Data Cleaner duplicate removal tests passed!" << std::endl;
 }
@@ -70,16 +71,17 @@ void test_data_cleaner_format_normalization() {
   DataCleaner cleaner;
   cleaner.set_numeric_precision(2);
 
-  // Test data with various numeric formats
+  // Test data with various numeric formats (first row treated as header)
   std::vector<std::vector<std::string>> data = {
+      {"header1", "header2", "header3"}, // Header row
       {"10.123456", "2021-01-01", "text"},
       {"15.789", "01/15/2021", "more text"},
       {"20.0", "2021/03/01", "another"}};
 
   cleaner.normalize_formats(data);
 
-  // Check numeric precision
-  test_assert(data[0][0].length() <= 5, true,
+  // Check numeric precision (row 1 since row 0 is header)
+  test_assert(data[1][0].length() <= 5, true,
               "numeric value should have limited precision"); // e.g., "10.12"
 
   std::cout << "Data Cleaner format normalization tests passed!" << std::endl;
@@ -90,12 +92,13 @@ void test_data_cleaner_complete_workflow() {
 
   DataCleaner cleaner;
 
-  // Test data with various issues
+  // Test data with various issues (first row is header)
   std::vector<std::vector<std::string>> data = {
+      {"col1", "col2", "col3"}, // Header row
       {"10.123456", "2021-01-01", "text"},
       {"", "25.789", "more text"},         // Missing value
       {"15.000", "NA", "another"},         // NA value
-      {"10.123456", "2021-01-01", "text"}, // Duplicate row
+      {"10.123456", "2021-01-01", "text"}, // Duplicate of row 1
       {"20.5", "01/15/2021", "final"}};
 
   size_t original_size = data.size();

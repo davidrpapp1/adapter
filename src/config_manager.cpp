@@ -108,6 +108,10 @@ void ConfigManager::set_delimiter(char delimiter) {
   settings["delimiter"] = std::string(1, delimiter);
 }
 
+void ConfigManager::set_target_time_interval(double interval) {
+  settings["target_time_interval"] = std::to_string(interval);
+}
+
 std::string ConfigManager::get_input_file() const {
   auto it = settings.find("input_file");
   return (it != settings.end()) ? it->second : "";
@@ -138,6 +142,18 @@ std::string ConfigManager::get_time_column() const {
 char ConfigManager::get_delimiter() const {
   auto it = settings.find("delimiter");
   return (it != settings.end() && !it->second.empty()) ? it->second[0] : ',';
+}
+
+double ConfigManager::get_target_time_interval() const {
+  auto it = settings.find("target_time_interval");
+  if (it != settings.end()) {
+    try {
+      return std::stod(it->second);
+    } catch (const std::exception &) {
+      return 1.0; // Default fallback
+    }
+  }
+  return 1.0;
 }
 
 void ConfigManager::print_configuration() const {

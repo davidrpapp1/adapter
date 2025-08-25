@@ -51,7 +51,6 @@ void test_full_pipeline() {
   data_with_headers.push_back(parser.get_headers());
   data_with_headers.insert(data_with_headers.end(), data.begin(), data.end());
 
-  size_t size_before_alignment = data_with_headers.size();
   aligner.align_time_series_data(
       data_with_headers, "time",
       std::vector<std::string>{"temperature", "pressure"},

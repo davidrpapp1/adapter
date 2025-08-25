@@ -21,6 +21,7 @@ public:
   void set_independent_variables(const std::vector<std::string> &variables);
   void set_time_column(const std::string &column_name);
   void set_delimiter(char delimiter);
+  void set_target_time_interval(double interval);
 
   std::string get_input_file() const;
   std::string get_output_file() const;
@@ -28,6 +29,7 @@ public:
   std::vector<std::string> get_independent_variables() const;
   std::string get_time_column() const;
   char get_delimiter() const;
+  double get_target_time_interval() const;
 
   void print_configuration() const;
 

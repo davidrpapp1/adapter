@@ -31,6 +31,7 @@ private:
 
   std::vector<double>
   parse_time_column(const std::vector<std::string> &time_column) const;
+  std::string format_time_value(double time_value) const;
   std::vector<double> create_uniform_time_grid(double start_time,
                                                double end_time) const;
   std::vector<std::string>

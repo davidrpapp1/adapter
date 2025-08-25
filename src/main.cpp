@@ -223,9 +223,10 @@ int AdapterApplication::run(int argc, char *argv[]) {
   std::vector<std::string> final_headers = parser.get_headers();
   std::vector<std::vector<std::string>> final_data = data;
 
-  if (!config.get_time_column().empty() && config.get_time_column() != "time") {
+  if (!config.get_time_column().empty()) {
     std::cout << "Step 3: Aligning time series data..." << std::endl;
     TimeAligner aligner;
+    aligner.set_target_time_interval(config.get_target_time_interval());
 
     // Prepare data with headers as first row
     std::vector<std::vector<std::string>> data_with_headers;
